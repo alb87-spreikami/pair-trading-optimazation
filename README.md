@@ -1,2 +1,18 @@
 # pair-trading-optimazation
 Optimalisasi strategy pair trading saham- saham yang begerak di sektor usaha yang sama.
+
+Pairs trading merupakan strategi dengan mengkolaborasikan dua saham dan memanfaatkan misspricing antara keduanya untuk mendapatkan cash pada setiap transaksinya. Melakukan short shelling pada saham overvalued dan long buy pada saham yang undervalued adalah hal yang biasa dilakukan. Namun, dengan melakukan kedua hal ini pada sepasang saham yang memiliki kriteria tertentu, dan menjalankan pada rangkaian siklus overvalued-undervalued sehingga cash didapatkan, itulah yang dimaksud dengan pairs trading. Pairs trading dapat menetralisir resiko pasar (risk free market), karena yang kita manfaatkan adalah harga relatif suatu saham terhadap saham lainnya (saham yang kita pasangkan). Dalam code ini sepasang saham dipilih yang meiliki sektor usaha yang sama, dan memiliki nilai cointegration yang tinggi. Cointegration merupakan long term correlation, namun secara short term akan timbul sparse yang ditimbulkan dari miss pricing antara kedua saham. Kebanyakan kasus saham yang memiliki cointegration yang tinggi adalah saham- saham yang bergerak pada sektor usaha yang sama. Hal ini karena adanya pengaruh pasar,ingat ya teory markowitz terkait efisiensi pasar !!! Meskipun demikian banyak paper yang sudah memberi ulasan bagaimana cara mencari sepasang saham yang dapat diaplikasikan pada strategi ini menggunakan algoritma ML (Machine Learning) salah satunya adalah algoritma OPTIC. Namun pada code ini diperuntukan pada saham- saham yang bergerak pada sektor yang sama saja.
+
+Secara garis besar model matematika yang digunakan :
+a. Cointegration coef : menentukan coef cointegration dari dua saham (pair).
+b. Model Ornstein-Uhlenbeck (OU) : merupakan model stochastic dimana pergerakan nya naik-turun pada area nilai rata- rata. setelah mencapai puncak tertinggi, tidak lupa untuk turun sampai lembah terdalam, kemudian kembali lagi naik, begitu siklusnya. OU process dikenal juga dengan mean reverting proses.
+c. savitzky-golay filter (SG Filter) : dipakai untuk proses smoothing, dengan proses convolusi persamaan polynomial. proses filtering daiharapkan mampu menghilangkan noise frekuensi tinggi (peak-peak sesaat pada time series), dengan begitu noise informasi dapat dihilangkan. 
+d. Fast Fourier Transform (FFT) : dipakai untuk melihat domain frekuensi pada time series yang sudah dilakukan smoothing.
+
+Proses calculasi dapat dijelaskan sebagai berikut :
+Jika :
+S_A0 dan S_B0,masing2 adalah harga stock A dan B pada saat awal masuk strategi (t=0). r_(B/A) adalah rasio total asset yang diinvestasikan antara stock B dan A.
+Misalkan sebanyak Rp 1,- di investasikan pada stock A, sehingga sebanyak α=1/S_A0 stock A ada ditangan, pada saat yang sama melakukan short selling stock B sebanyak β=r_(B/A)/S_B0. Sparse pada waktu tertentu didefinisikan sbb:
+                                                             S_t=α.S_At-β.S_Bt
+sparse dibuat sedemikian hingga r_(B/A) menjadi nilai optimal agar sparse mengikuti proses mean reverting.Hal ini dilakukan dengan cara fitting model Ornsthein-Uhlenbeck process dengan mencari nilai likelihood tertinggi. Selanjutnya dilakukan smoothing terhadap data sparse untuk menghilangkan noise yang ada pada data, namun tentu infromasi penting tetap kita jaga existensinya. Selanjutnya menggunakan FFT(Fast Fourier Transform) untuk melihat frekuensi penyusun time series sparse yang sudah dilakukan smoothing. Domain frekuensi digunakan karena yang ingin dilihat adalah rate dari cash yang bisa diperoleh, bukan besarnya nominal cash dalam satu periode strategy.
+
